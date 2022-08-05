@@ -13,7 +13,7 @@ struct LogIn<'r> {
     pass: &'r str,
 }
 
-#[post("/login", data = "<login>")]
+#[post("/", data = "<login>")]
 async fn login(pool: &State<Pool<MySql>>, login: Form<LogIn<'_>>) -> String {
     let receiv_pass = sqlx::query!("SELECT pass FROM admin WHERE id = ?",login.id).fetch_one(&**pool).await.unwrap();
     if receiv_pass.pass == login.pass {
@@ -34,7 +34,7 @@ async fn front() -> rocket::response::content::RawHtml<String> {
 async fn run() -> _ {
     // et ldb = SqlitePoolOptions::new().connect("./data/data.db").await.unwrap();
     let db = MySqlPoolOptions::new().connect("mysql://root:@127.0.0.1/data").await.unwrap();
-    rocket::build()//.mount("/", routes![login])
+    rocket::build().mount("/", routes![login])
                    .mount("/", routes![front])
                    .manage(db)
 }
